@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MapleAgent static preview</title>
+  <style>
+    :root { --ink:#12110f; --muted:#6f6a61; --paper:#fffaf2; --line:#ddd3c5; --accent:#0f5132; --danger:#8f1d1d; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); }
+    .shell { width:min(1280px, calc(100% - 40px)); margin:0 auto; padding:24px 0 56px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:20px; border-bottom:1px solid var(--line); padding-bottom:18px; }
+    .brand { display:flex; gap:14px; align-items:center; }
+    .mark { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; color:var(--paper); background:var(--ink); font-weight:800; }
+    .brand span { display:block; color:var(--muted); font-size:13px; margin-top:2px; }
+    .chip { border:1px solid var(--line); border-radius:999px; padding:9px 13px; color:var(--muted); font-size:13px; }
+    .hero { display:grid; grid-template-columns:1.2fr .8fr; gap:40px; align-items:end; padding:56px 0 34px; border-bottom:1px solid var(--line); }
+    .eyebrow { margin:0 0 9px; color:var(--accent); font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    h1 { margin:0; max-width:880px; font-size:clamp(46px, 7vw, 92px); line-height:.9; letter-spacing:-.075em; }
+    h2 { margin:0; font-size:clamp(24px, 3vw, 38px); line-height:1; letter-spacing:-.045em; }
+    p { margin-top:0; color:var(--muted); line-height:1.45; }
+    .hero p { font-size:20px; margin-bottom:0; }
+    .grid { display:grid; grid-template-columns:1fr 380px; gap:22px; padding-top:22px; }
+    section { border:1px solid var(--line); border-radius:28px; background:rgba(255,255,255,.5); }
+    .main { padding:28px; min-height:560px; }
+    .rail { overflow:hidden; }
+    .rail-section, .budget { padding:24px; border-bottom:1px solid var(--line); }
+    .rail-section:last-child { border-bottom:0; }
+    textarea { width:100%; min-height:110px; resize:vertical; border:1px solid var(--line); border-radius:16px; background:#fffdf8; padding:16px; font:inherit; font-size:18px; }
+    .actions { display:flex; gap:10px; margin:18px 0 28px; }
+    button { border:0; border-radius:999px; min-height:46px; padding:0 18px; font-weight:800; cursor:pointer; }
+    button:hover { filter:brightness(.96); }
+    .primary { background:var(--ink); color:var(--paper); }
+    .secondary { background:var(--accent); color:white; width:100%; }
+    .danger { background:var(--danger); color:white; width:100%; margin-top:10px; }
+    .meter { height:16px; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:#f4f0e9; margin:18px 0; }
+    .meter div { width:62.5%; height:100%; background:var(--accent); }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .stats div { border-left:1px solid var(--line); padding-left:12px; }
+    .stats span, .stats strong { display:block; } .stats span { color:var(--muted); font-size:12px; margin-bottom:6px; }
+    .timeline { border-top:1px solid var(--line); }
+    .item { display:grid; grid-template-columns:18px 1fr; gap:16px; padding:18px 0; border-bottom:1px solid var(--line); }
+    .dot { width:13px; height:13px; border-radius:50%; background:var(--accent); margin-top:4px; }
+    .item strong { display:block; margin-bottom:6px; }
+    .rowlist { border-top:1px solid var(--line); margin-top:18px; }
+    .row { display:grid; grid-template-columns:1fr 90px 90px; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); align-items:center; }
+    .pill { display:inline-flex; justify-content:center; border-radius:999px; padding:6px 10px; color:var(--accent); background:rgba(15,81,50,.1); font-size:12px; font-weight:800; }
+    .full { grid-column:1 / -1; padding:26px 28px; }
+    @media(max-width:900px){ .hero,.grid{grid-template-columns:1fr}.rail{order:-1}.row{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div class="brand"><div class="mark">M</div><div><strong>MapleAgent</strong><span>Budget-capped agent spending on Solana</span></div></div>
+      <div class="chip">UserWallet…11111</div>
+    </header>
+    <section class="hero" style="border-left:0;border-right:0;border-top:0;border-radius:0;background:transparent">
+      <div><p class="eyebrow">Superteam Canada demo</p><h1>Give AI agents a budget, not your wallet.</h1></div>
+      <p>Create a capped allowance, let MapleAgent buy paid Canadian tools, watch receipts index live, and revoke access whenever the job is done.</p>
+    </section>
+    <div class="grid">
+      <section class="main">
+        <p class="eyebrow">Current task</p><h2>Agent run console</h2><br />
+        <textarea>Plan a low-cost Saturday in Toronto for a visiting Solana builder from Vancouver.</textarea>
+        <div class="actions"><button class="primary">Run MapleAgent</button><button>Reset demo</button></div>
+        <div class="timeline">
+          <div class="item"><span class="dot"></span><div><strong>Task received</strong><p>MapleAgent checks available budget and plans paid tool calls.</p></div></div>
+          <div class="item"><span class="dot"></span><div><strong>MapleWeather · 0.25 mock USDC</strong><p>Paid weather API using delegated allowance.</p></div></div>
+          <div class="item"><span class="dot"></span><div><strong>TorontoEvents · 0.50 mock USDC</strong><p>Found a local builder meetup for the itinerary.</p></div></div>
+          <div class="item"><span class="dot"></span><div><strong>MapleHotels · 2.00 mock USDC</strong><p>Anchored the plan around a budget transit-friendly stay.</p></div></div>
+        </div>
+      </section>
+      <section class="rail">
+        <div class="budget"><p class="eyebrow">Agent budget</p><h2>6.25 mock USDC</h2><div class="meter"><div></div></div><div class="stats"><div><span>Granted</span><strong>10.00</strong></div><div><span>Spent</span><strong>3.75</strong></div><div><span>Remaining</span><strong>6.25</strong></div></div></div>
+        <div class="rail-section"><p class="eyebrow">Policy</p><h2>Guardrails</h2><div class="rowlist"><div class="row"><span>Max spend</span><strong>10.00</strong><span></span></div><div class="row"><span>Expiry</span><strong>24h</strong><span></span></div><div class="row"><span>Revocable</span><strong>Anytime</strong><span></span></div></div></div>
+        <div class="rail-section"><button class="secondary">Create agent budget</button><button class="danger">Revoke allowance</button></div>
+      </section>
+      <section class="full">
+        <p class="eyebrow">Onchain proof</p><h2>Recent receipts</h2>
+        <div class="rowlist"><div class="row"><strong>MapleWeather</strong><span>0.25</span><span class="pill">confirmed</span></div><div class="row"><strong>TorontoEvents</strong><span>0.50</span><span class="pill">confirmed</span></div><div class="row"><strong>MapleHotels</strong><span>2.00</span><span class="pill">confirmed</span></div></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
