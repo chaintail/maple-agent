@@ -1,7 +1,7 @@
 import { getAllowanceProvider } from '@maple-agent/solana';
 
 const provider = getAllowanceProvider();
-const result = provider.trySpendAfterRevoke('maple-weather');
+const result = await provider.trySpendAfterRevoke('maple-weather');
 
 if (result.ok) {
   console.log('Unexpected: spend succeeded.');

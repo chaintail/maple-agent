@@ -7,9 +7,11 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@maple-agent/agent-core": "0.1.0",
     "@maple-agent/db": "0.1.0",
     "@maple-agent/types": "0.1.0",
-    "@maple-agent/agent-core": "0.1.0"
+    "@solana/kit": "^6.10.0",
+    "@solana/subscriptions": "^0.3.0"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

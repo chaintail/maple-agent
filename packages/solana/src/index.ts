@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { readState, writeState } from '@maple-agent/db';
 import { formatUnits, parseUnits } from '@maple-agent/agent-core';
+import { SubscriptionsSdkAllowanceProvider } from './subscriptions-sdk-provider';
 import type {
   AllowanceSnapshot,
   DemoState,
@@ -37,13 +38,13 @@ export type TransferFixedParams = {
 };
 
 export interface AllowanceProvider {
-  seedDemoState(): DemoState;
-  getSnapshot(): AllowanceSnapshot;
-  getOrCreateSubscriptionAuthority(userWallet: WalletAddress, mint: WalletAddress): WalletAddress;
-  createFixedDelegation(params: CreateAllowanceParams): FixedDelegation;
-  transferFixed(params: TransferFixedParams): SpendReceipt;
-  revokeDelegation(delegationPda: WalletAddress): FixedDelegation;
-  trySpendAfterRevoke(toolId?: ToolId): { ok: boolean; message: string; receipt?: SpendReceipt };
+  seedDemoState(): Promise<DemoState>;
+  getSnapshot(): Promise<AllowanceSnapshot>;
+  getOrCreateSubscriptionAuthority(userWallet: WalletAddress, mint: WalletAddress): Promise<WalletAddress>;
+  createFixedDelegation(params: CreateAllowanceParams): Promise<FixedDelegation>;
+  transferFixed(params: TransferFixedParams): Promise<SpendReceipt>;
+  revokeDelegation(delegationPda: WalletAddress): Promise<FixedDelegation>;
+  trySpendAfterRevoke(toolId?: ToolId): Promise<{ ok: boolean; message: string; receipt?: SpendReceipt }>;
 }
 
 export class AllowanceError extends Error {
@@ -57,12 +58,12 @@ export class AllowanceError extends Error {
 }
 
 export class LocalLedgerAllowanceProvider implements AllowanceProvider {
-  seedDemoState(): DemoState {
+  async seedDemoState(): Promise<DemoState> {
     const state = createInitialState();
     return writeState(state);
   }
 
-  getSnapshot(): AllowanceSnapshot {
+  async getSnapshot(): Promise<AllowanceSnapshot> {
     const state = ensureState();
     return {
       tokenMint: state.tokenMint,
@@ -76,7 +77,7 @@ export class LocalLedgerAllowanceProvider implements AllowanceProvider {
     };
   }
 
-  getOrCreateSubscriptionAuthority(userWallet: WalletAddress, mint: WalletAddress): WalletAddress {
+  async getOrCreateSubscriptionAuthority(userWallet: WalletAddress, mint: WalletAddress): Promise<WalletAddress> {
     const state = ensureState();
     const authority = pda('subscription-authority', userWallet, mint);
     if (!state.events.some((event) => event.type === 'subscription_authority_initialized')) {
@@ -90,12 +91,12 @@ export class LocalLedgerAllowanceProvider implements AllowanceProvider {
     return authority;
   }
 
-  createFixedDelegation(params: CreateAllowanceParams): FixedDelegation {
+  async createFixedDelegation(params: CreateAllowanceParams): Promise<FixedDelegation> {
     let state = ensureState();
     const userWallet = params.userWallet ?? state.wallets.user.address;
     const delegateWallet = params.delegateWallet ?? state.wallets.agent.address;
     const tokenMint = state.tokenMint;
-    const subscriptionAuthority = this.getOrCreateSubscriptionAuthority(userWallet, tokenMint);
+    const subscriptionAuthority = await this.getOrCreateSubscriptionAuthority(userWallet, tokenMint);
     state = ensureState();
     const now = new Date();
     const delegationPda = pda('fixed-delegation', userWallet, delegateWallet, state.tokenMint, String(now.getTime()));
@@ -128,7 +129,7 @@ export class LocalLedgerAllowanceProvider implements AllowanceProvider {
     return writeState(state).currentAllowance!;
   }
 
-  transferFixed(params: TransferFixedParams): SpendReceipt {
+  async transferFixed(params: TransferFixedParams): Promise<SpendReceipt> {
     const state = ensureState();
     const allowance = normalizeAllowanceStatus(state.currentAllowance);
     state.currentAllowance = allowance;
@@ -188,7 +189,7 @@ export class LocalLedgerAllowanceProvider implements AllowanceProvider {
     return receipt;
   }
 
-  revokeDelegation(delegationPda: WalletAddress): FixedDelegation {
+  async revokeDelegation(delegationPda: WalletAddress): Promise<FixedDelegation> {
     const state = ensureState();
     const allowance = state.currentAllowance;
     if (!allowance || allowance.delegationPda !== delegationPda) {
@@ -205,7 +206,7 @@ export class LocalLedgerAllowanceProvider implements AllowanceProvider {
     return writeState(state).currentAllowance!;
   }
 
-  trySpendAfterRevoke(toolId: ToolId = 'maple-weather'): { ok: boolean; message: string; receipt?: SpendReceipt } {
+  async trySpendAfterRevoke(toolId: ToolId = 'maple-weather'): Promise<{ ok: boolean; message: string; receipt?: SpendReceipt }> {
     const state = ensureState();
     const tool = state.tools.find((candidate) => candidate.id === toolId);
     if (!tool || !state.currentAllowance) {
@@ -213,7 +214,7 @@ export class LocalLedgerAllowanceProvider implements AllowanceProvider {
     }
 
     try {
-      const receipt = this.transferFixed({
+      const receipt = await this.transferFixed({
         delegationPda: state.currentAllowance.delegationPda,
         toolId,
         toolName: tool.name,
@@ -232,6 +233,9 @@ export class LocalLedgerAllowanceProvider implements AllowanceProvider {
 }
 
 export function getAllowanceProvider(): AllowanceProvider {
+  if (process.env.SOLANA_ALLOWANCE_MODE === 'sdk') {
+    return new SubscriptionsSdkAllowanceProvider();
+  }
   return new LocalLedgerAllowanceProvider();
 }
 
@@ -468,12 +472,12 @@ Production adapter sketch:
 
 import { SubscriptionsClient } from '@solana/subscriptions';
 
-const client = new SubscriptionsClient({ rpc, programId });
+Use SOLANA_ALLOWANCE_MODE=sdk to select SubscriptionsSdkAllowanceProvider.
 
 await client.subscriptions.instructions.initSubscriptionAuthority(...);
 await client.subscriptions.instructions.createFixedDelegation(...);
 await client.subscriptions.instructions.transferFixed(...);
 await client.subscriptions.instructions.revokeDelegation(...);
 
-Keep the app-facing AllowanceProvider interface unchanged so the UI, agent, and indexer do not care whether the provider is local demo mode or the official program.
+The app-facing AllowanceProvider interface is async so local demo mode and the official program share the same call surface.
 `;

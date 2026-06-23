@@ -6,5 +6,6 @@ build
 .vite
 .DS_Store
 .maple-agent
+.maple-agent-devnet
 *.log
 coverage

@@ -17,7 +17,7 @@ let state = ensureState();
 
 if (!state.currentAllowance) {
   console.log('No allowance found. Creating a 10 mock USDC / 24h budget first.');
-  provider.createFixedDelegation({ amountBaseUnits: parseUnits('10'), expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) });
+  await provider.createFixedDelegation({ amountBaseUnits: parseUnits('10'), expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) });
   state = ensureState();
 }
 
@@ -42,7 +42,7 @@ for (const plan of task.plan) {
     continue;
   }
 
-  const receipt = provider.transferFixed({
+  const receipt = await provider.transferFixed({
     delegationPda: fresh.currentAllowance!.delegationPda,
     taskId: task.id,
     toolId: tool.id,

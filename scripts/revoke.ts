@@ -8,7 +8,7 @@ if (!state.currentAllowance) {
   process.exit(0);
 }
 
-const allowance = provider.revokeDelegation(state.currentAllowance.delegationPda);
+const allowance = await provider.revokeDelegation(state.currentAllowance.delegationPda);
 console.log('Allowance revoked.');
 console.log(`Delegation PDA: ${allowance.delegationPda}`);
 console.log(`Status:         ${allowance.status}`);

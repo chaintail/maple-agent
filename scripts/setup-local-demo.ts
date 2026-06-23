@@ -2,7 +2,7 @@ import { getAllowanceProvider } from '@maple-agent/solana';
 import { formatUnits } from '@maple-agent/agent-core';
 
 const provider = getAllowanceProvider();
-const state = provider.seedDemoState();
+const state = await provider.seedDemoState();
 
 console.log('MapleAgent demo state initialized.');
 console.log(`User wallet:  ${state.wallets.user.address}`);

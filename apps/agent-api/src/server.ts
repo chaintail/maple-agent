@@ -26,32 +26,32 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'agent-api' });
 });
 
-app.post('/demo/setup', (_req, res) => {
-  const state = provider.seedDemoState();
-  res.json({ ok: true, snapshot: provider.getSnapshot(), statePathExists: Boolean(state) });
+app.post('/demo/setup', async (_req, res) => {
+  const state = await provider.seedDemoState();
+  res.json({ ok: true, snapshot: await provider.getSnapshot(), statePathExists: Boolean(state) });
 });
 
-app.get('/snapshot', (_req, res) => {
-  res.json(provider.getSnapshot());
+app.get('/snapshot', async (_req, res) => {
+  res.json(await provider.getSnapshot());
 });
 
-app.post('/allowance/create', (req, res) => {
+app.post('/allowance/create', async (req, res) => {
   const amount = String(req.body?.amount ?? '10');
   const hours = Number(req.body?.hours ?? 24);
   const amountBaseUnits = parseUnits(amount);
   const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
-  const allowance = provider.createFixedDelegation({ amountBaseUnits, expiresAt });
+  const allowance = await provider.createFixedDelegation({ amountBaseUnits, expiresAt });
   markIndexerSync();
-  res.json({ allowance, snapshot: provider.getSnapshot() });
+  res.json({ allowance, snapshot: await provider.getSnapshot() });
 });
 
-app.post('/allowance/revoke', (req, res) => {
+app.post('/allowance/revoke', async (req, res) => {
   try {
-    const snapshot = provider.getSnapshot();
+    const snapshot = await provider.getSnapshot();
     const delegationPda = String(req.body?.delegationPda ?? snapshot.allowance?.delegationPda ?? '');
-    const allowance = provider.revokeDelegation(delegationPda);
+    const allowance = await provider.revokeDelegation(delegationPda);
     markIndexerSync();
-    res.json({ allowance, snapshot: provider.getSnapshot() });
+    res.json({ allowance, snapshot: await provider.getSnapshot() });
   } catch (error) {
     res.status(400).json(errorPayload(error));
   }
@@ -61,16 +61,16 @@ app.post('/agent/run-task', async (req, res) => {
   const prompt = String(req.body?.prompt ?? 'Plan a low-cost Saturday in Toronto for a visiting Solana builder.');
   try {
     const result = await runAgentTask(prompt);
-    res.json({ task: result, snapshot: provider.getSnapshot() });
+    res.json({ task: result, snapshot: await provider.getSnapshot() });
   } catch (error) {
     res.status(400).json(errorPayload(error));
   }
 });
 
-app.post('/agent/test-spend-after-revoke', (_req, res) => {
-  const result = provider.trySpendAfterRevoke('maple-weather');
+app.post('/agent/test-spend-after-revoke', async (_req, res) => {
+  const result = await provider.trySpendAfterRevoke('maple-weather');
   markIndexerSync();
-  res.status(result.ok ? 200 : 409).json({ result, snapshot: provider.getSnapshot() });
+  res.status(result.ok ? 200 : 409).json({ result, snapshot: await provider.getSnapshot() });
 });
 
 app.get('/tasks', (_req, res) => {
@@ -111,7 +111,7 @@ async function runAgentTask(prompt: string): Promise<AgentTask> {
     }
 
     try {
-      const receipt = provider.transferFixed({
+      const receipt = await provider.transferFixed({
         delegationPda: latest.currentAllowance!.delegationPda,
         taskId: task.id,
         toolId: tool.id,
